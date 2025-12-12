@@ -1,21 +1,16 @@
-'use server'
+"use server";
 
 export async function handleregister(formData: FormData) {
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const name = formData.get('name') as string;
+  const email = formData.get("email");
+  const password = formData.get("password");
+  const name = formData.get("name");
 
-    if (!email || !password || !name) {
-        return { success: false, error: "All fields are required." };
-    }
+  if (typeof email !== "string" || typeof password !== "string" || typeof name !== "string") {
+    return { success: false, error: "All fields are required." };
+  }
 
-    try {
-        //register logic with prisma
-
-    } catch (e) {
-        console.error("Registration Error:", e);
-        return { success: false, error: "An unexpected error occurred during registration." };
-    }
+  // TODO(prisma): implement create user + password hashing + unique email checks
+  return { success: false, error: "Registration not implemented yet." };
 }
 
 export async function handlechat(formData: FormData) {
