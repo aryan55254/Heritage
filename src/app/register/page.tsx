@@ -203,6 +203,7 @@ export default function RegisterPage() {
               )}
 
               {/* Form */}
+              {/* Form */}
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-amber-200 text-sm font-medium mb-2">
