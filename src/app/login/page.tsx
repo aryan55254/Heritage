@@ -17,17 +17,24 @@ export default function SignInPage() {
     setError(null);
     setIsLoading(true);
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    if (result?.error) {
-      setError("Invalid email or password.");
-      setIsLoading(false);
-    } else {
+      if (!result || result.error) {
+        setError("Invalid email or password.");
+        return;
+      }
+
       router.push("/chat");
+    } catch (err) {
+      console.error("Sign in error:", err);
+      setError("Unable to sign in right now. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
