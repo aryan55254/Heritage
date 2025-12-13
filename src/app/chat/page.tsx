@@ -120,13 +120,13 @@ export default function Chat() {
 
       {/* Header - Fixed at top */}
       <div className="relative z-20 border-b border-amber-500/20 bg-gradient-to-r from-amber-950/60 to-orange-950/60 backdrop-blur-md shadow-lg flex-shrink-0">
-        <div className="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Logo and title */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
                 <svg
-                  className="w-6 h-6 text-white"
+                  className="w-5 h-5 md:w-6 md:h-6 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -134,10 +134,10 @@ export default function Chat() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-200 via-orange-300 to-amber-200 bg-clip-text text-transparent">
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-amber-200 via-orange-300 to-amber-200 bg-clip-text text-transparent">
                   Heritage AI
                 </h1>
-                <p className="text-xs text-amber-200/60">
+                <p className="text-[10px] md:text-xs text-amber-200/60 hidden sm:block">
                   Your Guide to Indian History
                 </p>
               </div>
@@ -154,30 +154,30 @@ export default function Chat() {
       {/* Chat Messages - Scrollable middle section */}
       <div
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto relative z-10"
+        className="flex-1 overflow-y-auto relative z-10 scrollbar-thin scrollbar-thumb-amber-700 scrollbar-track-transparent"
       >
-        <div className="max-w-5xl mx-auto w-full p-4 md:p-8">
+        <div className="max-w-5xl mx-auto w-full p-4 pb-24 md:p-8 md:pb-8">
           {chatHistory.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center mb-6">
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center mb-6 animate-pulse">
                 <svg
-                  className="w-10 h-10 text-amber-300"
+                  className="w-8 h-8 md:w-10 md:h-10 text-amber-300"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
                   <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-amber-200 mb-2">
+              <h2 className="text-xl md:text-2xl font-bold text-amber-200 mb-2">
                 Welcome, {user?.name.split(" ")[0] || "Traveler"}
               </h2>
-              <p className="text-amber-200/60 mb-6 max-w-md">
+              <p className="text-sm md:text-base text-amber-200/60 mb-8 max-w-md mx-auto">
                 Ask me anything about Indian history, culture, monuments,
                 empires, and traditions.
               </p>
 
               {/* Suggested prompts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 {[
                   "Tell me about the Maurya Empire",
                   "What is the history of the Taj Mahal?",
@@ -187,7 +187,7 @@ export default function Chat() {
                   <button
                     key={idx}
                     onClick={() => setPrompt(suggestion)}
-                    className="p-4 bg-gradient-to-br from-amber-950/40 to-orange-950/40 backdrop-blur-sm border border-amber-500/20 rounded-xl text-amber-100 text-sm text-left hover:border-amber-400/40 hover:from-amber-950/60 hover:to-orange-950/60 transition-all"
+                    className="p-3 md:p-4 bg-gradient-to-br from-amber-950/40 to-orange-950/40 backdrop-blur-sm border border-amber-500/20 rounded-xl text-amber-100 text-xs md:text-sm text-left hover:border-amber-400/40 hover:from-amber-950/60 hover:to-orange-950/60 transition-all active:scale-95"
                   >
                     {suggestion}
                   </button>
@@ -195,14 +195,19 @@ export default function Chat() {
               </div>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {chatHistory.map((msg, idx) => (
-                <div key={idx} className="flex gap-3 items-start">
+                <div
+                  key={idx}
+                  className={`flex gap-3 items-start ${
+                    msg.role === "user" ? "flex-row-reverse" : ""
+                  }`}
+                >
                   {msg.role === "user" ? (
                     <>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg mt-1">
                         <svg
-                          className="w-5 h-5 text-white"
+                          className="w-4 h-4 text-amber-950"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -213,23 +218,23 @@ export default function Chat() {
                           />
                         </svg>
                       </div>
-                      <div className="bg-amber-900/30 rounded-2xl rounded-tl-none px-5 py-3 text-amber-50 max-w-2xl">
+                      <div className="bg-amber-900/40 border border-amber-500/20 rounded-2xl rounded-tr-none px-4 py-2.5 md:px-5 md:py-3 text-amber-50 max-w-[85%] md:max-w-2xl text-sm md:text-base">
                         {msg.content}
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center flex-shrink-0 shadow-lg mt-1">
                         <svg
-                          className="w-5 h-5 text-white"
+                          className="w-4 h-4 text-white"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
                           <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z" />
                         </svg>
                       </div>
-                      <div className="flex-grow bg-gradient-to-br from-amber-950/60 to-orange-950/60 backdrop-blur-sm border border-amber-500/30 rounded-2xl rounded-tl-none px-5 py-4 text-amber-50 shadow-2xl max-w-2xl">
-                        <p className="whitespace-pre-wrap leading-relaxed">
+                      <div className="flex-grow bg-gradient-to-br from-amber-950/60 to-orange-950/60 backdrop-blur-sm border border-amber-500/30 rounded-2xl rounded-tl-none px-4 py-3 md:px-5 md:py-4 text-amber-50 shadow-2xl max-w-[90%] md:max-w-2xl">
+                        <p className="whitespace-pre-wrap leading-relaxed text-sm md:text-base">
                           {msg.content}
                         </p>
                       </div>
@@ -241,24 +246,24 @@ export default function Chat() {
               {/* Loading indicator */}
               {isLoading && (
                 <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-600 to-red-600 flex items-center justify-center flex-shrink-0 shadow-lg mt-1">
                     <svg
-                      className="w-5 h-5 text-white"
+                      className="w-4 h-4 text-white"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
                       <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z" />
                     </svg>
                   </div>
-                  <div className="flex-grow bg-gradient-to-br from-amber-950/60 to-orange-950/60 backdrop-blur-sm border border-amber-500/30 rounded-2xl rounded-tl-none px-5 py-4 text-amber-50 shadow-2xl max-w-2xl">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></span>
+                  <div className="bg-gradient-to-br from-amber-950/60 to-orange-950/60 backdrop-blur-sm border border-amber-500/30 rounded-2xl rounded-tl-none px-4 py-3 text-amber-50 shadow-2xl">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce"></span>
                       <span
-                        className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"
+                        className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.1s" }}
                       ></span>
                       <span
-                        className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"
+                        className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       ></span>
                     </div>
@@ -267,71 +272,66 @@ export default function Chat() {
               )}
 
               {/* Invisible div to scroll to */}
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-4" />
             </div>
           )}
         </div>
       </div>
 
       {/* Input Form - Fixed at bottom */}
-      <div className="relative z-20 border-t border-amber-500/20 bg-gradient-to-r from-amber-950/60 to-orange-950/60 backdrop-blur-md flex-shrink-0">
-        <div className="max-w-5xl mx-auto w-full p-4 md:p-6">
+      <div className="relative z-20 border-t border-amber-500/20 bg-gradient-to-r from-amber-950/80 to-orange-950/80 backdrop-blur-xl flex-shrink-0">
+        <div className="max-w-5xl mx-auto w-full p-3 md:p-6 pb-6 md:pb-8">
           <div className="relative">
             <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 rounded-2xl blur opacity-20"></div>
-            <div className="relative bg-gradient-to-br from-amber-950/80 to-orange-950/80 backdrop-blur-md border border-amber-500/30 p-4 rounded-2xl shadow-2xl">
-              <div className="flex gap-3">
-                <input
-                  type="text"
+            <div className="relative bg-gradient-to-br from-amber-950/90 to-orange-950/90 backdrop-blur-md border border-amber-500/30 p-2 md:p-3 rounded-2xl shadow-2xl">
+              <div className="flex gap-2 md:gap-3 items-end">
+                <textarea
                   name="prompt"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={isLoading}
-                  placeholder="Ask about empires, traditions, monuments..."
-                  className="flex-grow px-5 py-3 bg-amber-950/50 border border-amber-500/30 rounded-xl text-amber-50 placeholder-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 disabled:opacity-50 transition-all"
+                  placeholder="Ask about empires, traditions..."
+                  rows={1}
+                  className="flex-grow px-4 py-3 md:py-3 bg-amber-950/50 border border-amber-500/30 rounded-xl text-amber-50 placeholder-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 disabled:opacity-50 transition-all resize-none min-h-[48px] max-h-[120px] text-sm md:text-base scrollbar-hide"
+                  style={{ height: "auto" }}
                 />
                 <button
                   onClick={handleSubmit}
                   disabled={isLoading || prompt.trim() === ""}
-                  className="px-6 cursor-pointer py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-500 hover:to-orange-500 disabled:from-amber-800 disabled:to-orange-800 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none flex items-center gap-2"
+                  className="flex-shrink-0 h-[48px] px-4 md:px-6 cursor-pointer bg-gradient-to-r from-amber-600 to-orange-600 text-white font-semibold rounded-xl hover:from-amber-500 hover:to-orange-500 disabled:from-amber-800 disabled:to-orange-800 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95 disabled:transform-none flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      <span>Thinking...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Ask</span>
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
                         stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                        />
-                      </svg>
-                    </>
+                        strokeWidth="4"
+                        fill="none"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                      />
+                    </svg>
                   )}
                 </button>
               </div>
