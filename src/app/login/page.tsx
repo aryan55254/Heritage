@@ -1,4 +1,3 @@
-// app/auth/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -21,12 +20,20 @@ export default function SignInPage() {
 
     try {
       const result = await handlelogin(formData);
-      if (result?.error) {
-        setError(result.error);
+
+      if (result?.success) {
+        // Success: Redirect manually to avoid "Unexpected response" errors
+        router.push("/chat");
+        router.refresh();
+      } else {
+        // Failure: Show error and stop loading
+        setError(result?.error || "Invalid email or password.");
         setIsLoading(false);
       }
     } catch (err) {
-      console.error("error occured while submitting the form", err);
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -147,7 +154,7 @@ export default function SignInPage() {
             <div className="relative bg-gradient-to-br from-amber-950/90 to-orange-950/90 backdrop-blur-xl border border-amber-500/30 p-8 rounded-2xl shadow-2xl">
               {/* Header */}
               <div className="text-center mb-8">
-                {/* Decorative top accent - matching landing page */}
+                {/* Decorative top accent */}
                 <div className="mb-6 flex items-center justify-center gap-3 opacity-80">
                   <div className="w-12 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
                   <svg
@@ -210,6 +217,7 @@ export default function SignInPage() {
                     </div>
                     <input
                       type="email"
+                      name="email"
                       placeholder="user@heritage.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -242,6 +250,7 @@ export default function SignInPage() {
                     </div>
                     <input
                       type="password"
+                      name="password"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

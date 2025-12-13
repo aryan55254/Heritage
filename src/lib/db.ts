@@ -1,3 +1,4 @@
+// src/lib/db.ts
 import mongoose from "mongoose";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -18,11 +19,25 @@ async function connectDB() {
     }
 
     if (!cached.promise) {
-        cached.promise = mongoose.connect(DATABASE_URL!).then((mongoose) => {
+        const opts = {
+            bufferCommands: false,
+            serverSelectionTimeoutMS: 10000,
+        };
+
+        cached.promise = mongoose.connect(DATABASE_URL!, opts).then((mongoose) => {
             return mongoose;
+        }).catch(err => {
+            throw err;
         });
     }
-    cached.conn = await cached.promise;
+
+    try {
+        cached.conn = await cached.promise;
+    } catch (e) {
+        cached.promise = null;
+        throw e;
+    }
+
     return cached.conn;
 }
 

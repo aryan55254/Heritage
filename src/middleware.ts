@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
@@ -10,28 +9,29 @@ export async function middleware(request: NextRequest) {
     const session = request.cookies.get("session")?.value;
     const { pathname } = request.nextUrl;
 
-    const protectedRoutes = ["/chat"];
-    const isProtectedRoute = protectedRoutes.some((route) =>
-        pathname.startsWith(route)
-    );
+    const protectedRoutes = ["/chat", "/settings"];
+    const authRoutes = ["/login", "/register", "/"];
 
-    const isPublicRoute = ["/login", "/register", "/"].includes(pathname);
+    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+    const isAuthRoute = authRoutes.includes(pathname);
 
-    let userId = null;
+    let isValidSession = false;
     if (session) {
         try {
-            const { payload } = await jwtVerify(session, encodedKey);
-            userId = payload.userId;
+            await jwtVerify(session, encodedKey, { algorithms: ["HS256"] });
+            isValidSession = true;
         } catch (err) {
-            console.log("Invalid session");
+            console.log("Session invalid");
         }
     }
 
-    if (isProtectedRoute && !userId) {
+    // 1. Protect Chat/Settings
+    if (isProtectedRoute && !isValidSession) {
         return NextResponse.redirect(new URL("/login", request.nextUrl));
     }
 
-    if (isPublicRoute && userId && pathname !== "/") {
+    // 2. Redirect away from Login if already logged in
+    if (isAuthRoute && isValidSession && pathname !== "/") {
         return NextResponse.redirect(new URL("/chat", request.nextUrl));
     }
 

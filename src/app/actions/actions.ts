@@ -1,16 +1,16 @@
 "use server";
 
-import connectDB from "../lib/db";
+import connectDB from "../../lib/db";
 import { User } from "../models/User";
 import bcrypt from "bcryptjs";
-import { createSession, deleteSession } from "../lib/session";
+import { createSession, deleteSession } from "../../lib/session";
 import { redirect } from "next/navigation";
 
 export async function handleregister(formData: FormData) {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-
+    console.log("SERVER: Register request received for:", email);
     if (!name || !email || !password) {
         return { success: false, error: "All fields are required." };
     }
@@ -31,18 +31,17 @@ export async function handleregister(formData: FormData) {
             password: hashedPassword,
         });
         await createSession(newUser._id.toString());
+        return { success: true };
 
     } catch (error) {
-        console.error("Registration error:", error);
         return { success: false, error: "Something went wrong." };
     }
-
-    redirect("/chat");
 }
 
 export async function handlelogin(formData: FormData) {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    console.log("SERVER: Register request received for:", email);
 
     if (!email || !password) {
         return { success: false, error: "All fields are required." };
@@ -61,18 +60,17 @@ export async function handlelogin(formData: FormData) {
         }
 
         await createSession(user._id.toString());
+        return { success: true };
 
     } catch (error) {
         console.error("Login error:", error);
         return { success: false, error: "Something went wrong." };
     }
-
-    redirect("/chat");
 }
 
 export async function handlelogout() {
     await deleteSession();
-    redirect("/login");
+    return { success: true };
 }
 export async function handlechat(formData: FormData) {
     const prompt = formData.get("prompt") as string;
