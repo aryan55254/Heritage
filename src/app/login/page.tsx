@@ -1,9 +1,9 @@
 // app/auth/page.tsx
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { handlelogin } from "../actions/actions";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -17,24 +17,16 @@ export default function SignInPage() {
     setError(null);
     setIsLoading(true);
 
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (!result || result.error) {
-        setError("Invalid email or password.");
-        return;
+      const result = await handlelogin(formData);
+      if (result?.error) {
+        setError(result.error);
+        setIsLoading(false);
       }
-
-      router.push("/chat");
     } catch (err) {
-      console.error("Sign in error:", err);
-      setError("Unable to sign in right now. Please try again.");
-    } finally {
-      setIsLoading(false);
+      console.error("error occured while submitting the form", err);
     }
   };
 
