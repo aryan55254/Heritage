@@ -1,9 +1,8 @@
-// app/auth/page.tsx
 "use client";
 
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { handlelogin } from "../actions/actions";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -17,23 +16,23 @@ export default function SignInPage() {
     setError(null);
     setIsLoading(true);
 
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+
     try {
-      const result = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
+      const result = await handlelogin(formData);
 
-      if (!result || result.error) {
-        setError("Invalid email or password.");
-        return;
+      if (result?.success) {
+        // Success: Redirect manually to avoid "Unexpected response" errors
+        router.push("/chat");
+        router.refresh();
+      } else {
+        // Failure: Show error and stop loading
+        setError(result?.error || "Invalid email or password.");
+        setIsLoading(false);
       }
-
-      router.push("/chat");
     } catch (err) {
-      console.error("Sign in error:", err);
-      setError("Unable to sign in right now. Please try again.");
-    } finally {
+      console.error("Login error:", err);
+      setError("Something went wrong. Please try again.");
       setIsLoading(false);
     }
   };
@@ -155,7 +154,7 @@ export default function SignInPage() {
             <div className="relative bg-gradient-to-br from-amber-950/90 to-orange-950/90 backdrop-blur-xl border border-amber-500/30 p-8 rounded-2xl shadow-2xl">
               {/* Header */}
               <div className="text-center mb-8">
-                {/* Decorative top accent - matching landing page */}
+                {/* Decorative top accent */}
                 <div className="mb-6 flex items-center justify-center gap-3 opacity-80">
                   <div className="w-12 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent"></div>
                   <svg
@@ -218,6 +217,7 @@ export default function SignInPage() {
                     </div>
                     <input
                       type="email"
+                      name="email"
                       placeholder="user@heritage.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -250,6 +250,7 @@ export default function SignInPage() {
                     </div>
                     <input
                       type="password"
+                      name="password"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

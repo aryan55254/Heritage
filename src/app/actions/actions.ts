@@ -1,25 +1,82 @@
 "use server";
 
+import connectDB from "../../lib/db";
+import { User } from "../models/User";
+import bcrypt from "bcryptjs";
+import { createSession, deleteSession } from "../../lib/session";
+import { redirect } from "next/navigation";
+
 export async function handleregister(formData: FormData) {
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const name = formData.get("name");
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    console.log("SERVER: Register request received for:", email);
+    if (!name || !email || !password) {
+        return { success: false, error: "All fields are required." };
+    }
 
-  if (typeof email !== "string" || typeof password !== "string" || typeof name !== "string") {
-    return { success: false, error: "All fields are required." };
-  }
+    try {
+        await connectDB();
 
-  // TODO(prisma): implement create user + password hashing + unique email checks
-  return { success: false, error: "Registration not implemented yet." };
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return { success: false, error: "Email already registered." };
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+        });
+        await createSession(newUser._id.toString());
+        return { success: true };
+
+    } catch (error) {
+        return { success: false, error: "Something went wrong." };
+    }
 }
 
+export async function handlelogin(formData: FormData) {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    console.log("SERVER: Register request received for:", email);
+
+    if (!email || !password) {
+        return { success: false, error: "All fields are required." };
+    }
+
+    try {
+        await connectDB();
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return { success: false, error: "Invalid credentials." };
+        }
+        const isValid = await bcrypt.compare(password, user.password);
+        if (!isValid) {
+            return { success: false, error: "Invalid credentials." };
+        }
+
+        await createSession(user._id.toString());
+        return { success: true };
+
+    } catch (error) {
+        console.error("Login error:", error);
+        return { success: false, error: "Something went wrong." };
+    }
+}
+
+export async function handlelogout() {
+    await deleteSession();
+    return { success: true };
+}
 export async function handlechat(formData: FormData) {
     const prompt = formData.get("prompt") as string;
 
-    // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Dummy responses based on keywords
     const responses: { [key: string]: string } = {
         "maurya": "The Maurya Empire (322-185 BCE) was one of the largest and most powerful empires in ancient India. Founded by Chandragupta Maurya, it reached its peak under Emperor Ashoka the Great, who ruled from 268 to 232 BCE. The empire stretched across most of the Indian subcontinent and parts of present-day Afghanistan and Iran.\n\nAshoka is particularly famous for embracing Buddhism after the bloody Kalinga War and promoting peace, non-violence, and dharma throughout his realm. His edicts, carved on rocks and pillars across the empire, are among the earliest preserved historical records in India.",
 

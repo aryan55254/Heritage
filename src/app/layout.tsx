@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Heritage",
-  description: "AI Chat Bot for Indian History",
+  description: "AI ChatBot for Indian History",
 };
 
 export default function RootLayout({

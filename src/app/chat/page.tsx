@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { handlechat } from "../actions/actions";
+import { getUserDetails } from "../actions/user";
+import UserMenu from "../../components/UserMenu";
 
 export default function Chat() {
   const [prompt, setPrompt] = useState("");
@@ -9,9 +11,19 @@ export default function Chat() {
   const [chatHistory, setChatHistory] = useState<
     Array<{ role: string; content: string }>
   >([]);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    null
+  );
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fetch user details on mount
+  useEffect(() => {
+    getUserDetails().then((data) => {
+      if (data) setUser(data);
+    });
+  }, []);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -52,7 +64,7 @@ export default function Chat() {
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-amber-900 via-orange-900 to-red-950 relative overflow-hidden">
       {/* Animated background patterns */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-20 left-10 w-64 h-64 bg-amber-400 rounded-full blur-3xl animate-pulse"></div>
         <div
           className="absolute bottom-20 right-10 w-96 h-96 bg-orange-400 rounded-full blur-3xl animate-pulse"
@@ -65,7 +77,7 @@ export default function Chat() {
       </div>
 
       {/* Decorative mandala patterns */}
-      <div className="absolute inset-0 opacity-5">
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
         <svg
           className="absolute top-10 right-20 w-48 h-48 animate-spin"
           style={{ animationDuration: "60s" }}
@@ -110,23 +122,6 @@ export default function Chat() {
       <div className="relative z-20 border-b border-amber-500/20 bg-gradient-to-r from-amber-950/60 to-orange-950/60 backdrop-blur-md shadow-lg flex-shrink-0">
         <div className="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* Back button */}
-            <button className="flex items-center gap-2 text-amber-200 hover:text-amber-100 transition-colors">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-            </button>
-
             {/* Logo and title */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
@@ -151,34 +146,7 @@ export default function Chat() {
 
           {/* User menu */}
           <div className="flex items-center gap-3">
-            <button className="p-2 text-amber-200 hover:text-amber-100 transition-colors">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                />
-              </svg>
-            </button>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
+            {user && <UserMenu initialName={user.name} email={user.email} />}
           </div>
         </div>
       </div>
@@ -201,7 +169,7 @@ export default function Chat() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-amber-200 mb-2">
-                Welcome to Heritage AI
+                Welcome, {user?.name.split(" ")[0] || "Traveler"}
               </h2>
               <p className="text-amber-200/60 mb-6 max-w-md">
                 Ask me anything about Indian history, culture, monuments,
