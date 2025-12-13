@@ -1,4 +1,4 @@
-# Heritage AI
+# Heritage
 
 **Heritage** is an AI-powered educational platform designed to guide users through India's rich history, culture, and traditions. Powered by the **Groq API (Llama 3)** and built with **Next.js 16**, it offers instant, accurate, and context-aware historical insights in a conversational interface.
 
