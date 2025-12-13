@@ -13,7 +13,7 @@
 
 ## Tech Stack
 
--   **Framework:** Next.js 14 (App Router)
+-   **Framework:** Next.js (App Router)
 -   **Language:** TypeScript
 -   **Database:** MongoDB (via Mongoose)
 -   **AI Engine:** Groq SDK (Llama 3.1-8b-instant)
@@ -85,16 +85,9 @@ src/
 
   - **No LocalStorage:** Tokens are stored exclusively in **HTTP-Only, Secure cookies** to prevent XSS attacks.
   - **Edge Middleware:** Authentication checks happen at the edge before the page even renders.
-  - **Server-Side Validation:** All inputs are validated strictly on the server using Zod/Native checks before hitting the database.
+  - **Server-Side Validation:** All inputs are validated strictly on the server using Native checks before hitting the database.
 
-## Contributing
-
-Contributions are welcome\! Please feel free to submit a Pull Request.
 
 ## License
 
 This project is licensed under the MIT License.
-
------
-
-**Built by [Aryan Mishra](https://www.google.com/search?q=https://github.com/aryan55254)**
