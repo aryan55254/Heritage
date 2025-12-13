@@ -159,7 +159,7 @@ export default function LandingPage() {
         <div className="mb-6 relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-500"></div>
           <a
-            href="/register"
+            href="/login"
             className="relative block px-10 py-4 bg-gradient-to-r from-amber-600 to-orange-600 rounded-xl text-lg font-semibold hover:from-amber-500 hover:to-orange-500 transition-all duration-300 shadow-2xl transform group-hover:scale-105"
           >
             Start Your Journey
@@ -171,10 +171,10 @@ export default function LandingPage() {
 
         {/* Login link */}
         <a
-          href="/login"
+          href="/register"
           className="text-sm text-amber-200/80 hover:text-amber-100 transition-colors underline decoration-amber-400/50 hover:decoration-amber-400 underline-offset-4"
         >
-          Already have an account? Sign in
+          Don't have an account? Register
         </a>
 
         {/* Features strip */}
