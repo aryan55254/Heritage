@@ -4,22 +4,24 @@
 
 ## Features
 
--   **AI Historical Guide:** Integrated with **Groq (Llama-3.1-8b)** to provide instant, accurate answers about Indian empires, monuments, and Vedic history.
--   **Custom Stateless Authentication:** A robust, secure authentication system built from scratch using **JWT (jose)** and **HTTP-only cookies**—no external auth providers.
--   **Secure Middleware:** Edge-compatible middleware protecting sensitive routes (`/chat`, `/settings`) with optimized session verification.
--   **User Management:** Full profile management allowing users to update display names and passwords securely.
--   **High Performance:** Built on **Next.js App Router** and **Server Actions** for zero-client-bundle data fetching.
--   **Modern UI/UX:** Responsive, glassmorphic design with animated backgrounds using **Tailwind CSS**.
+  - **AI Historical Guide:** Integrated with **Groq (Llama-3.1-8b)** to provide instant, accurate answers about Indian empires, monuments, and Vedic history.
+  - **Smart Rate Limiting:** Implemented a robust **Redis-backed rate limiter** (via Upstash) to prevent API abuse. It features an atomic fixed-window algorithm that handles race conditions and IP chains correctly.
+  - **Custom Stateless Authentication:** A robust, secure authentication system built from scratch using **JWT (jose)** and **HTTP-only cookies**—no external auth providers.
+  - **Secure Middleware:** Edge-compatible middleware protecting sensitive routes (`/chat`, `/settings`) with optimized session verification.
+  - **User Management:** Full profile management allowing users to update display names and passwords securely.
+  - **High Performance:** Built on **Next.js App Router** and **Server Actions** for zero-client-bundle data fetching.
+  - **Modern UI/UX:** Responsive, glassmorphic design with animated backgrounds using **Tailwind CSS**.
 
 ## Tech Stack
 
--   **Framework:** Next.js (App Router)
--   **Language:** TypeScript
--   **Database:** MongoDB (via Mongoose)
--   **AI Engine:** Groq SDK (Llama 3.1-8b-instant)
--   **Authentication:** Custom JWT (`jose`), `bcryptjs`, Secure Cookies
--   **Styling:** Tailwind CSS
--   **Deployment:** Vercel
+  - **Framework:** Next.js (App Router)
+  - **Language:** TypeScript
+  - **Database:** MongoDB (via Mongoose)
+  - **Rate Limiting:** Redis (Upstash Serverless)
+  - **AI Engine:** Groq SDK (Llama 3.1-8b-instant)
+  - **Authentication:** Custom JWT (`jose`), `bcryptjs`, Secure Cookies
+  - **Styling:** Tailwind CSS
+  - **Deployment:** Vercel
 
 ## Environment Variables
 
@@ -34,14 +36,18 @@ SESSION_SECRET="your_super_secret_complex_key_here"
 
 # Groq API Key for AI responses
 GROQ_API_KEY="gsk_..."
-````
+
+# Upstash Redis (For Rate Limiting)
+UPSTASH_REDIS_REST_URL="https://your-database.upstash.io"
+UPSTASH_REDIS_REST_TOKEN="your_upstash_token_here"
+```
 
 ## Getting Started Locally
 
 1.  **Clone the repository:**
 
     ```bash
-    git clone [https://github.com/yourusername/heritage.git](https://github.com/yourusername/heritage.git)
+    git clone https://github.com/yourusername/heritage.git
     cd heritage
     ```
 
@@ -52,7 +58,7 @@ GROQ_API_KEY="gsk_..."
     ```
 
 3.  **Set up Environment Variables:**
-    Create a `.env` file in the root directory and add the variables listed above.
+    Create a `.env` file in the root directory and add the variables listed above. You can get free Redis keys from [Upstash Console](https://console.upstash.com/).
 
 4.  **Run the development server:**
 
@@ -68,7 +74,7 @@ GROQ_API_KEY="gsk_..."
 ```bash
 src/
 ├── app/
-│   ├── actions/      # Server Actions (Auth, Chat, User updates)
+│   ├── actions/      # Server Actions (Auth, Chat, Rate Limits)
 │   ├── chat/         # Protected Chat Interface
 │   ├── login/        # Custom Login Page
 │   ├── register/     # Custom Registration Page
@@ -84,9 +90,9 @@ src/
 ## Security Highlights
 
   - **No LocalStorage:** Tokens are stored exclusively in **HTTP-Only, Secure cookies** to prevent XSS attacks.
+  - **Atomic Rate Limiting:** Uses atomic Redis operations (`set nx`, `incr`) to ensure strict API limits (Login, Register, Chat) are enforced even in distributed serverless environments.
   - **Edge Middleware:** Authentication checks happen at the edge before the page even renders.
   - **Server-Side Validation:** All inputs are validated strictly on the server using Native checks before hitting the database.
-
 
 ## License
 
