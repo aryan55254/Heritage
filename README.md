@@ -11,7 +11,8 @@
   - **User Management:** Full profile management allowing users to update display names and passwords securely.
   - **High Performance:** Built on **Next.js App Router** and **Server Actions** for zero-client-bundle data fetching.
   - **Modern UI/UX:** Responsive, glassmorphic design with animated backgrounds using **Tailwind CSS**.
-
+  - **Context-Aware Continuation Engine:** Handles follow-ups like “tell more” by reusing the last assistant response as temporary Redis-backed context.
+  - 
 ## Tech Stack
 
   - **Framework:** Next.js (App Router)
