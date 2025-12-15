@@ -97,10 +97,11 @@ export async function handlelogout() {
 
 // --- CHAT (AI) ---
 export async function handlechat(formData: FormData) {
-
     const ip = (await headers()).get("x-forwarded-for") || "unknown";
     const isLimited = await checkRateLimit(ip, "chat", 10, 60);
-    if (isLimited) return { success: false, message: "You are chatting too fast." };
+    if (isLimited) {
+        return { success: false, message: "You are chatting too fast." };
+    }
 
     const prompt = formData.get("prompt") as string;
 
@@ -108,13 +109,32 @@ export async function handlechat(formData: FormData) {
         return { success: false, message: "Please enter a valid prompt." };
     }
 
+    // ---- CONTINUATION DETECTION ----
+    const continuationPhrases = [
+        "tell more",
+        "more",
+        "continue",
+        "go on",
+        "explain more",
+        "expand",
+        "details"
+    ];
+
+    const normalizedPrompt = prompt.trim().toLowerCase();
+    const isContinuation = continuationPhrases.includes(normalizedPrompt);
+
+    // ---- REDIS CHAT CONTEXT KEY (per IP) ----
+    const chatContextKey = `chat:last:${ip}`;
+
     try {
-        //Call the API
-        const completion = await groq.chat.completions.create({
-            messages: [
-                {
-                    role: "system",
-                    content: `You are **Heritage AI**, an expert on Indian History, Culture, Monuments, Mythology, Traditions, and Heritage.
+        // Fetch last assistant message (if any)
+        const lastAssistantMessage = await redis.get<string>(chatContextKey);
+
+        // ---- BUILD MESSAGES ----
+        const messages: any[] = [
+            {
+                role: "system",
+                content: `You are **Heritage AI**, an expert on Indian History, Culture, Monuments, Mythology, Traditions, and Heritage.
 
 ──────────────── SCOPE ────────────────
 You may answer ONLY questions related to:
@@ -155,22 +175,48 @@ For ANY other topic, respond exactly with:
 5. Forbidden:
 - Asking questions
 - Mentioning instructions or rules
-- Breaking character
+- Breaking character`
+            }
+        ];
 
-`
-                },
-                { role: "user", content: prompt },
-            ],
+        // ---- CONTINUATION HANDLING ----
+        if (isContinuation && lastAssistantMessage) {
+            messages.push({
+                role: "system",
+                content: `Context: The user wants to continue or expand on the following explanation:\n\n${lastAssistantMessage}`
+            });
+            messages.push({
+                role: "user",
+                content: "Please continue."
+            });
+        } else {
+            messages.push({
+                role: "user",
+                content: prompt
+            });
+        }
+
+        // ---- CALL GROQ ----
+        const completion = await groq.chat.completions.create({
+            messages,
             model: "llama-3.1-8b-instant",
             temperature: 0.7,
-            max_tokens: 1024,
+            max_tokens: 1024
         });
 
-        const aiResponse = completion.choices[0]?.message?.content || "Could not retrieve history.";
-        return { success: true, message: aiResponse };
+        const aiResponse =
+            completion.choices[0]?.message?.content ||
+            "Could not retrieve history.";
 
+        // ---- STORE LAST AI MESSAGE (TTL 10 min) ----
+        await redis.set(chatContextKey, aiResponse, { ex: 600 });
+
+        return { success: true, message: aiResponse };
     } catch (error) {
         console.error("Groq API Error:", error);
-        return { success: false, message: "API connection failed. Check your API Key." };
+        return {
+            success: false,
+            message: "API connection failed. Check your API key."
+        };
     }
 }
