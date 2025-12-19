@@ -5,14 +5,15 @@
 ## Features
 
   - **AI Historical Guide:** Integrated with **Groq (Llama-3.1-8b)** to provide instant, accurate answers about Indian empires, monuments, and Vedic history.
-  - **Smart Rate Limiting:** Implemented a robust **Redis-backed rate limiter** (via Upstash) to prevent API abuse. It features an atomic fixed-window algorithm that handles race conditions and IP chains correctly.
+  - **Smart Rate Limiting:** Implemented a robust **Redis-backed Window Counter Rate Limit** (via Upstash) to prevent API abuse. It features an atomic fixed-window algorithm that handles race conditions and IP chains correctly.
+  - **Rate Limit Details:** Rate Limited to allow only 10 chat messages per 60 seconds for LLM API Security and 5 authentication requests per 600 seconds to not allow spam requests across My Server
   - **Custom Stateless Authentication:** A robust, secure authentication system built from scratch using **JWT (jose)** and **HTTP-only cookies**—no external auth providers.
   - **Secure Middleware:** Edge-compatible middleware protecting sensitive routes (`/chat`, `/settings`) with optimized session verification.
   - **User Management:** Full profile management allowing users to update display names and passwords securely.
   - **High Performance:** Built on **Next.js App Router** and **Server Actions** for zero-client-bundle data fetching.
   - **Modern UI/UX:** Responsive, glassmorphic design with animated backgrounds using **Tailwind CSS**.
   - **Context-Aware Continuation Engine:** Handles follow-ups like “tell more” by reusing the last assistant response as temporary Redis-backed context.
-  - 
+
 ## Tech Stack
 
   - **Framework:** Next.js (App Router)
