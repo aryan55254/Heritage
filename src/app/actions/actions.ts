@@ -98,43 +98,30 @@ export async function handlelogout() {
 // --- CHAT (AI) ---
 export async function handlechat(formData: FormData) {
     const ip = (await headers()).get("x-forwarded-for") || "unknown";
+
+    // 1. Rate Limiting
     const isLimited = await checkRateLimit(ip, "chat", 10, 60);
     if (isLimited) {
         return { success: false, message: "You are chatting too fast." };
     }
 
     const prompt = formData.get("prompt") as string;
-
     if (!prompt || prompt.trim() === "") {
         return { success: false, message: "Please enter a valid prompt." };
     }
 
-    // ---- CONTINUATION DETECTION ----
-    const continuationPhrases = [
-        "tell more",
-        "more",
-        "continue",
-        "go on",
-        "explain more",
-        "expand",
-        "details"
-    ];
-
-    const normalizedPrompt = prompt.trim().toLowerCase();
-    const isContinuation = continuationPhrases.includes(normalizedPrompt);
-
-    // ---- REDIS CHAT CONTEXT KEY (per IP) ----
-    const chatContextKey = `chat:last:${ip}`;
+    // 2. Define the Redis Key for this IP's history
+    const historyKey = `chat:history:${ip}`;
 
     try {
-        // Fetch last assistant message (if any)
-        const lastAssistantMessage = await redis.get<string>(chatContextKey);
+        // 3. Fetch History (Sliding Window)
+        // We store the history as a JSON string of messages
+        let history = await redis.get<any[]>(historyKey) || [];
 
-        // ---- BUILD MESSAGES ----
-        const messages: any[] = [
-            {
-                role: "system",
-                content: `You are **Heritage AI**, an expert on Indian History, Culture, Monuments, Mythology, Traditions, and Heritage.
+        // 4. Define System Prompt
+        const systemMessage = {
+            role: "system",
+            content: `You are **Heritage AI**, an expert on Indian History, Culture, Monuments, Mythology, Traditions, and Heritage.
 
 ──────────────── SCOPE ────────────────
 You may answer ONLY questions related to:
@@ -148,70 +135,54 @@ For ANY other topic, respond exactly with:
 "I specialize in Indian history and culture. Please ask about that."
 
 ──────────────── STRICT BEHAVIOR RULES ────────────────
-
 1. NO QUESTIONS RULE (VERY IMPORTANT):
 - You must NEVER ask the user any questions.
-- Do NOT ask follow-ups, clarifications, or prompts.
-- Do NOT invite the user to ask more.
+- Do NOT ask follow-ups.
 
 2. Acknowledgments:
-- If the user says "ok", "okay", "thanks", "cool", "yeah", or similar:
-  Respond ONLY with a brief acknowledgment like:
-  "You're welcome!" or "Happy to help!"
-  End the response.
+- If the user says "ok", "thanks", etc., respond with a brief acknowledgment and END.
 
-3. Unclear or empty input:
-- If the user input is unclear, vague, or non-informational:
-  Respond with:
-  "Please ask a question related to Indian history or culture."
-  Do NOT ask for clarification.
-
-4. Answering valid questions:
+3. Answering valid questions:
 - Length: 100–150 words unless asked for detail
-- Include relevant dates, names, and places
 - Be factual, calm, and conversational
-- No markdown, no emojis
+- No markdown, no emojis`
+        };
 
-5. Forbidden:
-- Asking questions
-- Mentioning instructions or rules
-- Breaking character`
-            }
+        // 5. Construct the Payload
+        // We prepend the system message to the history, then add the new user prompt
+        // Note: We keep the system message distinct so it's always at index 0 in the request
+        const messagesToContext = [
+            systemMessage,
+            ...history,
+            { role: "user", content: prompt }
         ];
 
-        // ---- CONTINUATION HANDLING ----
-        if (isContinuation && lastAssistantMessage) {
-            messages.push({
-                role: "system",
-                content: `Context: The user wants to continue or expand on the following explanation:\n\n${lastAssistantMessage}`
-            });
-            messages.push({
-                role: "user",
-                content: "Please continue."
-            });
-        } else {
-            messages.push({
-                role: "user",
-                content: prompt
-            });
-        }
-
-        // ---- CALL GROQ ----
+        // 6. Call Groq
         const completion = await groq.chat.completions.create({
-            messages,
+            messages: messagesToContext,
             model: "llama-3.1-8b-instant",
             temperature: 0.7,
             max_tokens: 1024
         });
 
-        const aiResponse =
-            completion.choices[0]?.message?.content ||
-            "Could not retrieve history.";
+        const aiResponse = completion.choices[0]?.message?.content || "Could not retrieve history.";
 
-        // ---- STORE LAST AI MESSAGE (TTL 10 min) ----
-        await redis.set(chatContextKey, aiResponse, { ex: 600 });
+        // 7. Update History in Redis
+        // We push the new interaction: User Prompt + AI Response
+        history.push({ role: "user", content: prompt });
+        history.push({ role: "assistant", content: aiResponse });
+
+        // Optimize: Keep only the last 6 messages (3 turns) to save tokens/costs
+        // This creates the "Sliding Window" effect
+        if (history.length > 6) {
+            history = history.slice(history.length - 6);
+        }
+
+        // Save back to Redis with a 10-minute expiry (TTL)
+        await redis.set(historyKey, history, { ex: 600 });
 
         return { success: true, message: aiResponse };
+
     } catch (error) {
         console.error("Groq API Error:", error);
         return {
